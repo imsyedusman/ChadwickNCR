@@ -21,5 +21,8 @@
   "workspaces": [
     "server",
     "client"
-  ]
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  }
 }
