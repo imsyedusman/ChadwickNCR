@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config';
 import { ncrService } from '../services/ncr.service';
 import { ArrowLeft, AlertTriangle, ShieldAlert, MapPin, Tag, Building2, Paperclip, X, Trash2, CloudUpload } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -38,7 +39,7 @@ const NcrFormPage = () => {
 
   useEffect(() => {
     setFetching(true);
-    axios.get('http://localhost:3001/api/ncrs/departments').then(res => {
+    axios.get(`${API_URL}/ncrs/departments`).then(res => {
       setDepartments(res.data);
     }).catch(err => {
       console.error('Failed to fetch departments:', err);

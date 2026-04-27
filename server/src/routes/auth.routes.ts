@@ -8,8 +8,15 @@ const router = Router();
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await AuthService.findUserByEmail(email);
-    if (!user || !(await AuthService.comparePassword(password, user.passwordHash))) {
+    const user = await AuthService.findUserByEmail(email?.toLowerCase().trim());
+    if (!user) {
+      console.log(`[AUTH] Login failed: User not found (${email})`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isMatch = await AuthService.comparePassword(password, user.passwordHash);
+    if (!isMatch) {
+      console.log(`[AUTH] Login failed: Password mismatch for ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

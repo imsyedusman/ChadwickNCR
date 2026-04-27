@@ -86,26 +86,37 @@ async function seed() {
       where: eq(users.email, user.email),
     });
 
-    if (!existing) {
-      const deptId = deptMap[user.department];
-      if (!deptId) {
-        console.error(`❌ Department not found for user ${user.name}: ${user.department}`);
-        continue;
-      }
+    const deptId = deptMap[user.department];
+    if (!deptId) {
+      console.error(`❌ Department not found for user ${user.name}: ${user.department}`);
+      continue;
+    }
 
+    if (!existing) {
       await db.insert(users).values({
         name: user.name,
-        email: user.email,
+        email: user.email.toLowerCase().trim(),
         passwordHash,
         role: user.role as any,
         departmentId: deptId,
         mustChangePassword: true,
       });
-      console.log(`+ User: ${user.name} (${user.role})`);
+      console.log(`+ Created User: ${user.email}`);
+    } else {
+      // FORCE update the password hash and other details even if user exists
+      await db.update(users)
+        .set({
+          passwordHash,
+          role: user.role as any,
+          departmentId: deptId,
+          mustChangePassword: true,
+        })
+        .where(eq(users.id, existing.id));
+      console.log(`↻ Reset/Updated User: ${user.email}`);
     }
   }
 
-  console.log('✅ Seeding complete!');
+  console.log('✅ Seeding complete! All passwords reset to: Chadwick@2026');
   process.exit(0);
 }
 

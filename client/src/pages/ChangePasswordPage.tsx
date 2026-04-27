@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import API_URL from '../config';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -42,7 +43,7 @@ const ChangePasswordPage = () => {
 
     setLoading(true);
     try {
-      await axios.patch('http://localhost:3001/api/auth/change-password-enforced', { newPassword });
+      await axios.patch(`${API_URL}/auth/change-password-enforced`, { newPassword });
       
       // Update local user state
       if (user) {

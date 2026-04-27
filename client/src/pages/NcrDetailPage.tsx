@@ -21,6 +21,7 @@ import {
   Trash2
 } from 'lucide-react';
 import axios from 'axios';
+import { API_URL, BASE_URL } from '../config';
 import Timeline from '../components/Timeline';
 import RcaWidget from '../components/RcaWidget';
 import CapaActionList from '../components/CapaActionList';
@@ -61,7 +62,7 @@ const NcrDetailPage = () => {
         console.error('Error fetching NCR:', err);
         setLoading(false);
       });
-      axios.get('http://localhost:3001/api/ncrs/departments').then(res => {
+      axios.get(`${API_URL}/ncrs/departments`).then(res => {
         setDepartments(res.data);
       }).catch(err => console.error(err));
     } else {
@@ -433,7 +434,7 @@ const NcrDetailPage = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <a href={`http://localhost:3001${file.url}`} target="_blank" rel="noreferrer" className="p-2 text-muted-foreground hover:text-primary transition-colors">
+                      <a href={`${BASE_URL}${file.url}`} target="_blank" rel="noreferrer" className="p-2 text-muted-foreground hover:text-primary transition-colors">
                         <Download size={18} />
                       </a>
                       <Button

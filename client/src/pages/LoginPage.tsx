@@ -7,6 +7,8 @@ import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 
+import API_URL from '../config';
+
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:3001/api/auth/login', { email, password });
+      const res = await axios.post(`${API_URL}/auth/login`, { email, password });
       login(res.data.token, res.data.user);
       navigate('/');
     } catch (err: any) {
