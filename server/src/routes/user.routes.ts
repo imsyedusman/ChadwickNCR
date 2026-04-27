@@ -5,7 +5,7 @@ import { authenticate, authorize, AuthRequest } from '../middleware/auth';
 const router = Router();
 
 // Admin only routes
-router.get('/', authenticate, authorize(['ADMIN']), async (req, res) => {
+router.get('/', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res) => {
   try {
     const users = await UserService.getAllUsers();
     console.log(`[DEBUG] Fetched ${users.length} users for admin ${req.user!.id}`);
