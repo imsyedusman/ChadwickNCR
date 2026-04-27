@@ -1,0 +1,509 @@
+{
+  "picture": {
+    "hidden": false,
+    "url": "",
+    "size": 64,
+    "rotation": 0,
+    "aspectRatio": 1,
+    "borderRadius": 0,
+    "borderColor": "rgba(0, 0, 0, 0)",
+    "borderWidth": 0,
+    "shadowColor": "rgba(0, 0, 0, 0.5)",
+    "shadowWidth": 0
+  },
+  "basics": {
+    "name": "Syed Usman",
+    "headline": "IT Support | Systems & Service Analyst | Relocating to Darwin",
+    "email": "imsyedusman@gmail.com",
+    "phone": "+61 410 286 674",
+    "location": "Darwin, NT",
+    "website": {
+      "url": "https://syedusman.cloud/",
+      "label": ""
+    },
+    "customFields": []
+  },
+  "summary": {
+    "title": "Summary",
+    "columns": 1,
+    "hidden": false,
+    "content": "<p>IT professional with a Master's in Information Technology and hands-on experience across systems analysis, technical support, and service delivery. Proven ability to troubleshoot complex system issues, coordinate user acceptance testing, and translate business requirements into structured IT solutions. Actively relocating to Darwin to pursue a long-term career in a stable, community-focused environment. Eager to contribute to a high-performing IT team at Airport Development Group, supporting critical infrastructure operations with precision and reliability.</p>"
+  },
+  "sections": {
+    "profiles": {
+      "title": "Profiles",
+      "columns": 4,
+      "hidden": false,
+      "items": [
+        {
+          "id": "df7ffj6ymcrtqq9k8j0pbn99",
+          "hidden": false,
+          "icon": "linkedin",
+          "network": "LinkedIn",
+          "username": "imsyedusman",
+          "website": {
+            "url": "https://www.linkedin.com/in/imsyedusman",
+            "label": "@imsyedusman"
+          }
+        },
+        {
+          "id": "azbn5xuw3s7bafv6ba2f844a",
+          "hidden": false,
+          "icon": "github",
+          "network": "GitHub",
+          "username": "imsyedusman",
+          "website": {
+            "url": "https://github.com/imsyedusman",
+            "label": "@imsyedusman"
+          }
+        },
+        {
+          "id": "ejgnyyg1z43x1ewj2rnnsmw5",
+          "hidden": false,
+          "icon": "upwork",
+          "network": "Upwork",
+          "username": "syedusman25",
+          "website": {
+            "url": "https://www.upwork.com/freelancers/syedusman25",
+            "label": "@syedusman25"
+          }
+        }
+      ]
+    },
+    "experience": {
+      "title": "Experience",
+      "columns": 1,
+      "hidden": false,
+      "items": [
+        {
+          "id": "wmijkqi2rc4ijd48ufmxy0r2",
+          "hidden": false,
+          "company": "Chadwick Switchboards",
+          "position": "Business Analyst / Systems Analyst",
+          "location": "Smithfield, NSW",
+          "period": "July 2025 - Present",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Served as the internal IT point of contact for system-related queries and workflow tool issues, resolving user-raised tickets and escalating complex incidents to relevant stakeholders in a timely manner.</p></li><li><p>Coordinated User Acceptance Testing (UAT) sessions across business units — authoring test cases, tracking defects through to resolution, and confirming system readiness prior to deployment.</p></li><li><p>Rebuilt the end-to-end Quote-to-Cash (Q2C) workflow, reducing quote turnaround time by <strong>30–40%</strong> and eliminating reliance on fragmented Excel tools.</p></li><li><p>Designed and implemented a scalable pricing and costing model, cutting manual calculation errors by <strong>90%+</strong> and significantly reducing rework.</p></li><li><p>Produced technical documentation including process maps, user guides, and system specifications to support ongoing IT operations and onboarding.</p></li><li><p>Partnered with the CEO and engineering stakeholders to translate complex business rules into structured system logic, improving decision speed and operational accuracy.</p></li></ul>",
+          "roles": []
+        },
+        {
+          "id": "dpfsc545hb8g5kruht9lfpit",
+          "hidden": true,
+          "company": "PFD Foods Pty Ltd",
+          "position": "Storeperson | Warehouse Operations (Weekends)",
+          "location": "Chullora, NSW",
+          "period": "November 2023 - Present",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Supported daily warehouse operations including picking, dispatch, and stock handling in a high-volume environment, consistently meeting tight cut-off times for outbound loads.</p></li><li><p>Maintained high picking accuracy across chilled and dry goods, contributing to a <strong>reduction in pick errors and rework</strong> during peak periods.</p></li><li><p>Assisted supervisors with Excel-based tracking for stock movements and pallet reconciliation, improving visibility and reducing manual follow-ups.</p></li><li><p>Prepared and printed pallet labels for CHEP and internal transfers, helping streamline despatch workflows and reduce dispatch delays.</p></li><li><p>Recognised for reliability and time management, regularly trusted with priority tasks during busy shifts and staff shortages.</p></li></ul>",
+          "roles": []
+        },
+        {
+          "id": "uo0bjfvehwe8zkrfc3l8igyd",
+          "hidden": false,
+          "company": "Accenture",
+          "position": "IT & Data Analytics Intern",
+          "location": "Remote",
+          "period": "October 2024 - January 2025",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Supported service delivery workflows by tracking task completion, flagging issues, and maintaining quality standards across analytics deliverables.</p></li><li><p>Conducted data validation and quality assurance checks to ensure accuracy of reporting outputs, contributing to test case development and results verification.</p></li><li><p>Built interactive dashboards in Power BI to visualise key performance metrics, enabling data-driven decision-making for internal stakeholders.</p></li><li><p>Applied SQL queries to extract and manipulate large datasets, improving reporting efficiency by <strong>30%</strong>.</p></li><li><p>Documented business and technical requirements for data solutions, bridging communication between technical teams and business users.</p></li></ul>",
+          "roles": []
+        },
+        {
+          "id": "datdd0dbb0fcp2ztplspxcae",
+          "hidden": false,
+          "company": "Vanguard Media",
+          "position": "Web Developer and Social Media Marketing Specialist",
+          "location": "Remote",
+          "period": "May 2021 - Present",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Managed website performance and uptime, troubleshooting technical issues and coordinating fixes to maintain consistent user experience across client platforms.</p></li><li><p>Analysed campaign and web traffic data to identify trends and deliver actionable insights, achieving a <strong>50% increase in audience reach</strong> within one year.</p></li><li><p>Maintained digital systems and tools across multiple client accounts, providing ongoing technical support and documentation.</p></li></ul>",
+          "roles": []
+        },
+        {
+          "id": "prgow1w3nybuajrrssahg83u",
+          "hidden": true,
+          "company": "Fiverr and Upwork",
+          "position": "Freelance WordPress Developer and Digital Marketing Expert",
+          "location": "Remote",
+          "period": "June 2020 - Present",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Developed custom WordPress websites with a focus on user experience, <strong>conducting performance analysis</strong> that improved load times by <strong>20%</strong>.</p></li><li><p>Managed SEO strategies, increasing website visibility and organic search traffic by an average of <strong>30%</strong>, utilizing analytics tools for data-driven decisions.</p></li><li><p>Designed and executed digital marketing campaigns, driving a <strong>40% increase in lead generation</strong> through targeted outreach and analysis of campaign effectiveness.</p></li><li><p>Utilized email marketing strategies to nurture leads, achieving a <strong>15% increase in customer retention</strong> through data segmentation and tailored content.</p></li></ul>",
+          "roles": []
+        }
+      ]
+    },
+    "education": {
+      "title": "Education",
+      "columns": 1,
+      "hidden": false,
+      "items": [
+        {
+          "id": "ihr4mbtgk5ifp9xe8v2aqlxx",
+          "hidden": false,
+          "school": "Asia Pacific International College",
+          "degree": "",
+          "area": "Master Of Information Technology ",
+          "grade": "",
+          "location": "",
+          "period": "July 2023 - December 2025",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        },
+        {
+          "id": "phbiupt11dcbhary4zyhsvec",
+          "hidden": false,
+          "school": "University of Karachi",
+          "degree": "",
+          "area": "Bachelor Of Software Engineering ",
+          "grade": "",
+          "location": "",
+          "period": "February 2019 - February 2023",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        }
+      ]
+    },
+    "projects": {
+      "title": "Projects",
+      "columns": 1,
+      "hidden": true,
+      "items": [
+        {
+          "id": "sh9qk14byr5x0abnad0g82e1",
+          "hidden": false,
+          "name": "Sales Performance Dashboard",
+          "period": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Designed an interactive dashboard in Tableau to track sales trends across different regions and product categories.</p></li><li><p>Integrated data from multiple sources using SQL and automated ETL pipelines, improving data accuracy by 20%.</p></li><li><p>Provided data-driven recommendations that led to a 12% increase in overall sales.</p></li></ul>"
+        },
+        {
+          "id": "jgkaanbguive0ixamy7gd92y",
+          "hidden": false,
+          "name": " Market Analysis Report",
+          "period": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Conducted market research and data analysis to create a comprehensive market analysis report for a fictitious product launch.</p></li><li><p> Utilized Excel and data visualization techniques to present key findings and recommendations</p></li></ul>"
+        },
+        {
+          "id": "ej5bhbv41dcy9psn6icdm2r5",
+          "hidden": false,
+          "name": " Website Traffic Analysis ",
+          "period": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Analyzed website traffic data using Google Analytics to identify user behavior and trends. </p></li><li><p>Presented insights and recommendations to improve website user experience and increase conversions.</p></li></ul>"
+        }
+      ]
+    },
+    "skills": {
+      "title": "Skills",
+      "columns": 2,
+      "hidden": false,
+      "items": [
+        {
+          "id": "9gvznba8rt1az9rf5685gbf0",
+          "hidden": false,
+          "icon": "",
+          "name": "IT Service Management",
+          "proficiency": "",
+          "level": 5,
+          "keywords": [
+            "ITIL Foundation",
+            "Incident Management",
+            "Service Desk Support",
+            "Ticketing Systems",
+            "JIRA",
+            "Escalation Handling"
+          ]
+        },
+        {
+          "id": "9r00lct482jmotf84an1qhp6",
+          "hidden": false,
+          "icon": "",
+          "name": "Systems Analysis & Testing",
+          "proficiency": "",
+          "level": 5,
+          "keywords": [
+            "Requirements Gathering",
+            "UAT Coordination",
+            "Test Case Design",
+            "Defect Tracking",
+            "Process Mapping",
+            "Technical Documentation"
+          ]
+        },
+        {
+          "id": "w0zizbezhch3yan7dlnhyakl",
+          "hidden": false,
+          "icon": "",
+          "name": "Data & Reporting",
+          "proficiency": "",
+          "level": 5,
+          "keywords": [
+            "SQL",
+            "Excel",
+            "Power BI",
+            "Tableau",
+            "Python",
+            "Google Data Studio"
+          ]
+        },
+        {
+          "id": "grd8nxjlagjmfft4nbk5pgj1",
+          "hidden": false,
+          "icon": "",
+          "name": "Tools & Technologies",
+          "proficiency": "",
+          "level": 5,
+          "keywords": [
+            "Microsoft Power Automate",
+            "Google Sheets",
+            "MySQL",
+            "PostgreSQL",
+            "Agile & Scrum",
+            "AWS (Essentials)"
+          ]
+        }
+      ]
+    },
+    "languages": {
+      "title": "Languages",
+      "columns": 5,
+      "hidden": false,
+      "items": [
+        {
+          "id": "g7oj47wujibm59azik5agspg",
+          "hidden": false,
+          "language": "English",
+          "fluency": "",
+          "level": 5
+        },
+        {
+          "id": "iml8rlcr169xlh5hqc8oyyht",
+          "hidden": false,
+          "language": "Urdu",
+          "fluency": "",
+          "level": 5
+        },
+        {
+          "id": "a2c1pfqm8i38dzh7igdjuezf",
+          "hidden": false,
+          "language": "Hindi",
+          "fluency": "",
+          "level": 5
+        }
+      ]
+    },
+    "interests": {
+      "title": "Interests",
+      "columns": 1,
+      "hidden": false,
+      "items": []
+    },
+    "awards": {
+      "title": "Awards",
+      "columns": 1,
+      "hidden": false,
+      "items": []
+    },
+    "certifications": {
+      "title": "Certifications",
+      "columns": 1,
+      "hidden": false,
+      "items": [
+        {
+          "id": "u5f98j6kwthv8fdmhjcow1lm",
+          "hidden": false,
+          "title": "ITIL Foundation Certificate in IT Service Management",
+          "issuer": "AXELOS",
+          "date": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        },
+        {
+          "id": "lm0s7avmqki6ay1jicuaod16",
+          "hidden": false,
+          "title": "Google Data Analytics Professional Certificate",
+          "issuer": "Coursera",
+          "date": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        },
+        {
+          "id": "f2e0qhl41acwrcuszeq7ai0u",
+          "hidden": false,
+          "title": "Microsoft Certified: Power BI Data Analyst Associate",
+          "issuer": "Coursera",
+          "date": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        },
+        {
+          "id": "xz70lz6mvnvhgdiq6sc3ih2h",
+          "hidden": false,
+          "title": "AWS Cloud Technical Essentials",
+          "issuer": "Coursera",
+          "date": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": ""
+        }
+      ]
+    },
+    "publications": {
+      "title": "Publications",
+      "columns": 1,
+      "hidden": false,
+      "items": []
+    },
+    "volunteer": {
+      "title": "Volunteering",
+      "columns": 1,
+      "hidden": true,
+      "items": [
+        {
+          "id": "rcior9pct780av1qmgd8eg8y",
+          "hidden": false,
+          "organization": "Edhi Welfare Organization",
+          "location": "Karachi",
+          "period": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<p></p>"
+        },
+        {
+          "id": "schxsq3qhiga929mquuxl4jb",
+          "hidden": false,
+          "organization": "DHA Central Library",
+          "location": "Karachi",
+          "period": "",
+          "website": {
+            "url": "",
+            "label": ""
+          },
+          "description": "<ul><li><p>Taught data analytics fundamentals and Excel skills to individuals from non-technical backgrounds.</p></li><li><p>Helped senior citizens improve their digital skills, bridging the digital divide within the community.</p></li></ul>"
+        }
+      ]
+    },
+    "references": {
+      "title": "References",
+      "columns": 1,
+      "hidden": false,
+      "items": []
+    }
+  },
+  "customSections": [],
+  "metadata": {
+    "template": "bronzor",
+    "layout": {
+      "sidebarWidth": 35,
+      "pages": [
+        {
+          "fullWidth": false,
+          "main": [
+            "summary",
+            "profiles",
+            "experience",
+            "education",
+            "certifications",
+            "skills",
+            "projects",
+            "volunteer",
+            "references"
+          ],
+          "sidebar": [
+            "interests",
+            "awards",
+            "publications",
+            "languages"
+          ]
+        }
+      ]
+    },
+    "css": {
+      "enabled": false,
+      "value": "* {\n\toutline: 1px solid #000;\n\toutline-offset: 4px;\n}"
+    },
+    "page": {
+      "gapX": 4,
+      "gapY": 6,
+      "marginX": 20,
+      "marginY": 20,
+      "format": "a4",
+      "locale": "en-US",
+      "hideIcons": false
+    },
+    "design": {
+      "level": {
+        "icon": "star",
+        "type": "circle"
+      },
+      "colors": {
+        "primary": "rgba(220, 38, 38, 1)",
+        "text": "rgba(0, 0, 0, 1)",
+        "background": "rgba(255, 255, 255, 1)"
+      }
+    },
+    "typography": {
+      "body": {
+        "fontFamily": "Inter",
+        "fontWeights": [
+          "400"
+        ],
+        "fontSize": 10.5,
+        "lineHeight": 1.5
+      },
+      "heading": {
+        "fontFamily": "Inter",
+        "fontWeights": [
+          "600"
+        ],
+        "fontSize": 13.5,
+        "lineHeight": 1.5
+      }
+    },
+    "notes": ""
+  }
+}

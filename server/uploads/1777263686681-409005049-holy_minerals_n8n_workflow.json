@@ -1,0 +1,277 @@
+{
+  "name": "Himalayan Salt Lead Gen + Outreach Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "days", "daysInterval": 1 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "id": "schedule-trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── STAGE 1: LEAD DISCOVERY ───\n// Defines search queries to find AU Himalayan salt wholesale buyers\n// across different buyer segments\nconst segments = [\n  { type: 'Health Retailer', query: 'himalayan salt wholesale retailer Australia', keywords: ['health food', 'organic', 'natural'] },\n  { type: 'Spa & Wellness', query: 'himalayan salt spa therapy Australia', keywords: ['wellness', 'spa', 'massage', 'therapy'] },\n  { type: 'Food Distributor', query: 'himalayan salt food distributor Australia bulk', keywords: ['wholesale', 'distributor', 'food service'] },\n  { type: 'Halotherapy', query: 'salt cave halotherapy Australia supplier', keywords: ['halotherapy', 'salt cave', 'salt room'] },\n  { type: 'Gourmet / Restaurant', query: 'himalayan pink salt restaurant gourmet Australia', keywords: ['gourmet', 'restaurant', 'chef', 'cooking'] },\n  { type: 'Animal Feed', query: 'himalayan salt lick animal feed Australia wholesale', keywords: ['livestock', 'animal', 'equine', 'farm'] },\n  { type: 'Construction', query: 'himalayan salt bricks wall tiles Australia', keywords: ['construction', 'bricks', 'tiles', 'interior'] },\n  { type: 'Bath & Beauty', query: 'himalayan bath salt wholesale Australia beauty', keywords: ['beauty', 'bath', 'skincare', 'cosmetic'] }\n];\n\nreturn segments.map(s => ({ json: s }));"
+      },
+      "name": "Define Lead Segments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300],
+      "id": "define-segments"
+    },
+    {
+      "parameters": {
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "query", "value": "={{ $json.query }}" },
+            { "name": "region", "value": "au" },
+            { "name": "key", "value": "={{ $credentials.googlePlacesApiKey }}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Google Places Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [640, 300],
+      "id": "google-places"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── STAGE 2: PARSE + NORMALISE PLACES RESULTS ───\nconst results = $json.results || [];\nconst segment = $('Define Lead Segments').item.json;\n\nreturn results.map(place => ({\n  json: {\n    company_name: place.name,\n    address: place.formatted_address,\n    state: (() => {\n      const states = ['NSW','VIC','QLD','WA','SA','TAS','ACT','NT'];\n      return states.find(s => place.formatted_address?.includes(s)) || 'AU';\n    })(),\n    google_place_id: place.place_id,\n    google_rating: place.rating || null,\n    segment_type: segment.type,\n    status: 'discovered',\n    source: 'google_places',\n    discovered_at: new Date().toISOString()\n  }\n}));"
+      },
+      "name": "Parse Places Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 300],
+      "id": "parse-places"
+    },
+    {
+      "parameters": {
+        "url": "https://api.hunter.io/v2/domain-search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "domain", "value": "={{ $json.website || '' }}" },
+            { "name": "api_key", "value": "={{ $credentials.hunterApiKey }}" },
+            { "name": "limit", "value": "3" }
+          ]
+        }
+      },
+      "name": "Hunter.io Email Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1080, 200],
+      "id": "hunter-email"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apollo.io/v1/people/search",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "q_organization_name", "value": "={{ $json.company_name }}" },
+            { "name": "person_titles[]", "value": "Purchasing Manager" },
+            { "name": "person_titles[]", "value": "Procurement" },
+            { "name": "person_titles[]", "value": "Buyer" },
+            { "name": "person_titles[]", "value": "Owner" },
+            { "name": "person_titles[]", "value": "Director" },
+            { "name": "organization_locations[]", "value": "Australia" },
+            { "name": "page", "value": "1" },
+            { "name": "per_page", "value": "3" }
+          ]
+        }
+      },
+      "name": "Apollo.io Contact Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1080, 400],
+      "id": "apollo-search"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── STAGE 3: ENRICH LEAD PROFILE ───\n// Merges Google Places + Hunter.io + Apollo data into one lead record\nconst base = $('Parse Places Results').item.json;\nconst hunterData = $('Hunter.io Email Lookup').item.json;\nconst apolloData = $('Apollo.io Contact Search').item.json;\n\nconst emails = hunterData?.data?.emails || [];\nconst contact = apolloData?.people?.[0] || {};\n\n// Map segment to product interest from catalogue\nconst productMap = {\n  'Health Retailer': 'Food Grade Salt (Fine/Coarse Pink - P601-P609), Bath Salt',\n  'Spa & Wellness': 'Bath & Asthma Salt, Salt Lamps (home décor), Halo Therapy Articles',\n  'Food Distributor': 'Food Grade Salt bulk (P601-P609), Kitchenware & Seasoning',\n  'Halotherapy': 'Halo Salt Therapy Articles (P59-P60), Salt Bricks (Construction)',\n  'Gourmet / Restaurant': 'Food Grade Salt Fine/Coarse, Kitchenware & Seasoning, Salt Grinders',\n  'Animal Feed': 'Animal Lick Articles (P68-P69)',\n  'Construction': 'Construction Articles - Salt Bricks/Tiles (P64-P67)',\n  'Bath & Beauty': 'Industrial, Bath & Asthma Salt Articles (P70-P74)'\n};\n\nconst enriched = {\n  ...base,\n  contact_name: contact.name || emails[0]?.first_name ? `${emails[0]?.first_name || ''} ${emails[0]?.last_name || ''}`.trim() : 'Procurement Team',\n  contact_title: contact.title || 'Buyer/Owner',\n  email: contact.email || emails[0]?.value || null,\n  email_confidence: emails[0]?.confidence || null,\n  linkedin_url: contact.linkedin_url || null,\n  company_size: contact.organization?.estimated_num_employees || 'Unknown',\n  website: contact.organization?.website_url || hunterData?.data?.domain || null,\n  product_interest: productMap[base.segment_type] || 'General Himalayan Salt Products',\n  status: 'enriched',\n  enriched_at: new Date().toISOString(),\n  outreach_sent: false,\n  reply_received: false,\n  follow_up_count: 0\n};\n\nreturn [{ json: enriched }];"
+      },
+      "name": "Build Enriched Lead Profile",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 300],
+      "id": "enrich-profile"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─── STAGE 4: PERSONALISED OUTREACH COPY GENERATOR ───\n// Creates tailored email + LinkedIn message based on lead segment\nconst lead = $json;\n\nconst firstName = lead.contact_name?.split(' ')[0] || 'there';\nconst company = lead.company_name;\nconst segment = lead.segment_type;\nconst products = lead.product_interest;\nconst state = lead.state;\n\n// ── EMAIL SUBJECT LINES (A/B variants) ──\nconst subjects = {\n  'Health Retailer': `Direct Himalayan Rock Salt Supply for ${company} — AU Importer`,\n  'Spa & Wellness': `Premium Himalayan Salt Products for ${company} — Direct from Mine`,\n  'Food Distributor': `Bulk Himalayan Rock Salt — Competitive Wholesale Pricing for ${state}`,\n  'Halotherapy': `Himalayan Salt Therapy Supplies — Direct Importer, ${state}`,\n  'Gourmet / Restaurant': `Himalayan Pink Salt for ${company} — Food Grade, Direct Supply`,\n  'Animal Feed': `Himalayan Salt Licks — Bulk Wholesale for ${state} Distributors`,\n  'Construction': `Himalayan Salt Bricks & Construction Articles — ${state} Importer`,\n  'Bath & Beauty': `Himalayan Bath Salt Wholesale — Private Label Available, ${state}`\n};\n\n// ── EMAIL BODY ──\nconst emailBody = `Hi ${firstName},\n\nI hope this finds you well. My name is [YOUR NAME] and I represent The Holy Minerals — a direct importer of Himalayan Rock Salt products sourced from the Khewra Salt Mine in Pakistan, the world's second largest salt mine.\n\nI noticed ${company} works in the ${segment.toLowerCase()} space, and I believe we can add real value to your supply chain. We carry a full range that would suit your needs:\n\n📦 Relevant to you: ${products}\n\nWhy source through us?\n• Direct mine-to-AU importer — no middlemen, sharper pricing\n• Full product range: food grade, lamps, bath, construction, halotherapy & more\n• Flexible MOQs — suitable for both retail and wholesale volumes\n• White label packaging available — your brand, our product\n• Australian-based operations with fast local fulfilment\n\nI'd love to send you our full product catalogue and a tailored wholesale price list. If you're currently sourcing Himalayan salt, I'm confident we can offer better pricing or range.\n\nWould you be open to a quick 15-minute call this week?\n\nWarm regards,\n[YOUR NAME]\nThe Holy Minerals\n[YOUR PHONE]\n[YOUR EMAIL]\n\nP.S. We also offer white label solutions — if you'd like products packaged under your own brand, we can discuss that too.`;\n\n// ── LINKEDIN MESSAGE (short, casual) ──\nconst linkedinMsg = `Hi ${firstName}, I'm a direct importer of Himalayan Rock Salt into Australia (The Holy Minerals) — we carry food grade, lamps, bath, halotherapy and construction products directly from the Khewra Mine. Given what ${company} does, I thought there might be a fit. Happy to send our catalogue + wholesale pricing if you're interested? Also offer white label if that's useful.`;\n\n// ── FOLLOW-UP EMAIL (Day 5) ──\nconst followUp1 = `Hi ${firstName},\n\nJust following up on my note from earlier this week about Himalayan Rock Salt supply for ${company}.\n\nI wanted to share that we currently have competitive pricing on our most popular lines — food grade pink salt (fine & coarse), salt lamps, and bath salts — with Australian stock available for fast delivery.\n\nWould it be worth a quick chat? Happy to work around your schedule.\n\nBest,\n[YOUR NAME] | The Holy Minerals`;\n\n// ── FOLLOW-UP 2 (Day 12) ──\nconst followUp2 = `Hi ${firstName},\n\nLast touch from me — I don't want to clog your inbox!\n\nIf Himalayan salt sourcing isn't on your radar right now, no worries at all. But if timing changes or you'd like our catalogue for future reference, just reply and I'll send it through.\n\nAll the best,\n[YOUR NAME] | The Holy Minerals`;\n\nreturn [{\n  json: {\n    ...lead,\n    outreach: {\n      email_subject: subjects[segment] || `Himalayan Rock Salt Supply — Direct AU Importer`,\n      email_body: emailBody,\n      linkedin_message: linkedinMsg,\n      follow_up_day5: followUp1,\n      follow_up_day12: followUp2\n    },\n    status: 'ready_to_send'\n  }\n}];"
+      },
+      "name": "Generate Outreach Copy",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1520, 300],
+      "id": "generate-copy"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "isNotEmpty" }
+            }
+          ]
+        }
+      },
+      "name": "Has Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1740, 300],
+      "id": "check-email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.outreach.email_subject }}",
+        "emailType": "text",
+        "message": "={{ $json.outreach.email_body }}",
+        "options": {
+          "replyTo": "youremail@gmail.com",
+          "appendAttribution": false
+        }
+      },
+      "name": "Send Gmail Outreach",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1960, 200],
+      "id": "send-gmail",
+      "credentials": { "gmailOAuth2": { "id": "gmail-cred", "name": "Gmail OAuth2" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log leads without email for manual LinkedIn outreach\nconst lead = $json;\nconsole.log(`[LinkedIn Queue] ${lead.company_name} — ${lead.linkedin_url || 'Search manually'} — ${lead.outreach?.linkedin_message}`);\nreturn [{ json: { ...lead, status: 'linkedin_queue' } }];"
+      },
+      "name": "Queue for LinkedIn",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1960, 420],
+      "id": "linkedin-queue"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Leads" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Company": "={{ $json.company_name }}",
+            "Segment": "={{ $json.segment_type }}",
+            "State": "={{ $json.state }}",
+            "Contact Name": "={{ $json.contact_name }}",
+            "Title": "={{ $json.contact_title }}",
+            "Email": "={{ $json.email }}",
+            "Email Confidence": "={{ $json.email_confidence }}",
+            "LinkedIn": "={{ $json.linkedin_url }}",
+            "Website": "={{ $json.website }}",
+            "Product Interest": "={{ $json.product_interest }}",
+            "Company Size": "={{ $json.company_size }}",
+            "Status": "={{ $json.status }}",
+            "Email Subject": "={{ $json.outreach.email_subject }}",
+            "Discovered At": "={{ $json.discovered_at }}",
+            "Outreach Sent": "false",
+            "Reply Received": "false",
+            "Follow Up Count": "0",
+            "Notes": ""
+          }
+        }
+      },
+      "name": "Log to Google Sheets CRM",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2180, 300],
+      "id": "log-sheets",
+      "credentials": { "googleSheetsOAuth2Api": { "id": "sheets-cred", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "days", "daysInterval": 5 }] }
+      },
+      "name": "Follow-up Trigger (Day 5)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 600],
+      "id": "followup-trigger-5"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "mode": "id", "value": "YOUR_GOOGLE_SHEET_ID" },
+        "sheetName": { "mode": "name", "value": "Leads" },
+        "filters": {
+          "conditions": [
+            { "keyName": "Status", "condition": "eq", "keyValue": "email_sent" },
+            { "keyName": "Reply Received", "condition": "eq", "keyValue": "false" },
+            { "keyName": "Follow Up Count", "condition": "eq", "keyValue": "0" }
+          ]
+        }
+      },
+      "name": "Get Leads Needing Follow-up",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [420, 600],
+      "id": "get-followup-leads",
+      "credentials": { "googleSheetsOAuth2Api": { "id": "sheets-cred", "name": "Google Sheets" } }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ 'Re: ' + $json['Email Subject'] }}",
+        "emailType": "text",
+        "message": "={{ $json['Follow Up Day5'] }}",
+        "options": { "appendAttribution": false }
+      },
+      "name": "Send Follow-up Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [640, 600],
+      "id": "send-followup",
+      "credentials": { "gmailOAuth2": { "id": "gmail-cred", "name": "Gmail OAuth2" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Define Lead Segments", "type": "main", "index": 0 }]] },
+    "Define Lead Segments": { "main": [[{ "node": "Google Places Search", "type": "main", "index": 0 }]] },
+    "Google Places Search": { "main": [[{ "node": "Parse Places Results", "type": "main", "index": 0 }]] },
+    "Parse Places Results": {
+      "main": [[
+        { "node": "Hunter.io Email Lookup", "type": "main", "index": 0 },
+        { "node": "Apollo.io Contact Search", "type": "main", "index": 0 }
+      ]]
+    },
+    "Hunter.io Email Lookup": { "main": [[{ "node": "Build Enriched Lead Profile", "type": "main", "index": 0 }]] },
+    "Apollo.io Contact Search": { "main": [[{ "node": "Build Enriched Lead Profile", "type": "main", "index": 0 }]] },
+    "Build Enriched Lead Profile": { "main": [[{ "node": "Generate Outreach Copy", "type": "main", "index": 0 }]] },
+    "Generate Outreach Copy": { "main": [[{ "node": "Has Email?", "type": "main", "index": 0 }]] },
+    "Has Email?": {
+      "main": [
+        [{ "node": "Send Gmail Outreach", "type": "main", "index": 0 }],
+        [{ "node": "Queue for LinkedIn", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Gmail Outreach": { "main": [[{ "node": "Log to Google Sheets CRM", "type": "main", "index": 0 }]] },
+    "Queue for LinkedIn": { "main": [[{ "node": "Log to Google Sheets CRM", "type": "main", "index": 0 }]] },
+    "Follow-up Trigger (Day 5)": { "main": [[{ "node": "Get Leads Needing Follow-up", "type": "main", "index": 0 }]] },
+    "Get Leads Needing Follow-up": { "main": [[{ "node": "Send Follow-up Email", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [{ "name": "lead-gen" }, { "name": "himalayan-salt" }, { "name": "australia" }]
+}
