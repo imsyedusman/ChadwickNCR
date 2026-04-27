@@ -27,7 +27,7 @@ router.post('/', authenticate, authorize(['ADMIN']), async (req: AuthRequest, re
 router.patch('/:id', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res) => {
   try {
     const { name, role, departmentId } = req.body;
-    const user = await UserService.updateUser(req.params.id, { name, role, departmentId }, req.user!.id);
+    const user = await UserService.updateUser(req.params.id as string, { name, role, departmentId }, req.user!.id);
     res.json(user);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -37,7 +37,7 @@ router.patch('/:id', authenticate, authorize(['ADMIN']), async (req: AuthRequest
 router.patch('/:id/status', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res) => {
   try {
     const { isActive } = req.body;
-    const user = await UserService.setUserStatus(req.params.id, isActive, req.user!.id);
+    const user = await UserService.setUserStatus(req.params.id as string, isActive, req.user!.id);
     res.json(user);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -46,7 +46,7 @@ router.patch('/:id/status', authenticate, authorize(['ADMIN']), async (req: Auth
 
 router.post('/:id/reset-password', authenticate, authorize(['ADMIN']), async (req: AuthRequest, res) => {
   try {
-    const tempPassword = await UserService.resetPassword(req.params.id, req.user!.id);
+    const tempPassword = await UserService.resetPassword(req.params.id as string, req.user!.id);
     res.json({ tempPassword });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

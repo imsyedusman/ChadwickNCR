@@ -28,7 +28,7 @@ router.post('/', authenticate, authorize(['ADMIN']), async (req, res) => {
 router.patch('/:id', authenticate, authorize(['ADMIN']), async (req, res) => {
   try {
     const { name, primaryHandlerId } = req.body;
-    const dept = await DepartmentService.updateDepartment(req.params.id, { name, primaryHandlerId });
+    const dept = await DepartmentService.updateDepartment(req.params.id as string, { name, primaryHandlerId });
     res.json(dept);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -37,7 +37,7 @@ router.patch('/:id', authenticate, authorize(['ADMIN']), async (req, res) => {
 
 router.delete('/:id', authenticate, authorize(['ADMIN']), async (req, res) => {
   try {
-    await DepartmentService.deleteDepartment(req.params.id);
+    await DepartmentService.deleteDepartment(req.params.id as string);
     res.status(204).send();
   } catch (error: any) {
     res.status(400).json({ error: error.message });
