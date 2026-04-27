@@ -15,7 +15,8 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-dotenv.config();
+// Load .env from the server directory regardless of where the process is started
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 // Validate critical environment variables
 const requiredEnv = ['DATABASE_URL', 'JWT_SECRET'];
@@ -78,6 +79,9 @@ app.get('/api/debug-db', async (req, res) => {
     const { count, eq }: any = await import('drizzle-orm');
     
     const userCount = await db.select({ value: count() }).from(users);
+    const { departments }: any = await import('./db/schema.js');
+    const deptCount = await db.select({ value: count() }).from(departments);
+    
     const susman = await db.query.users.findFirst({
       where: eq(users.email, 'susman@chadwickswitchboards.com.au')
     });
@@ -85,8 +89,10 @@ app.get('/api/debug-db', async (req, res) => {
     res.json({
       database: 'connected',
       userCount: userCount[0].value,
+      deptCount: deptCount[0].value,
       susmanExists: !!susman,
       susmanEmail: susman?.email,
+      databaseUrl: process.env.DATABASE_URL?.replace(/\/\/.*@/, '//****:****@'),
       env: {
         NODE_ENV: process.env.NODE_ENV,
         PORT: process.env.PORT,

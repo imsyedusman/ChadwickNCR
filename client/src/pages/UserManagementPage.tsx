@@ -47,7 +47,8 @@ import {
   Key, 
   Filter,
   Trash2,
-  Edit2
+  Edit2,
+  AlertTriangle
 } from 'lucide-react';
 import UserDialog from '../components/UserDialog';
 import RoleBadge from '../components/RoleBadge';
@@ -63,6 +64,7 @@ const UserManagementPage = () => {
   const [userDialogOpen, setUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [tempPassword, setTempPassword] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Department management state
   const [newDeptName, setNewDeptName] = useState('');
@@ -72,14 +74,17 @@ const UserManagementPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
+      setError(null);
       const [usersData, deptsData] = await Promise.all([
         userService.getAll(),
         departmentService.getAll()
       ]);
+      console.log(`[DEBUG] Loaded ${usersData.length} users and ${deptsData.length} departments`);
       setUsers(usersData);
       setDepartments(deptsData);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load data:', error);
+      setError(error.message || 'Failed to load team data');
     } finally {
       setLoading(false);
     }
@@ -179,6 +184,14 @@ const UserManagementPage = () => {
           Invite User
         </Button>
       </header>
+
+      {error && (
+        <div className="bg-destructive/10 p-4 rounded-lg flex items-center gap-3 text-destructive text-sm font-bold border border-destructive/20 animate-in fade-in slide-in-from-top-2">
+          <AlertTriangle size={18} />
+          {error}
+          <Button variant="ghost" size="sm" onClick={loadData} className="ml-auto h-7 text-[10px] font-black uppercase">Retry</Button>
+        </div>
+      )}
 
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="bg-muted/50 p-1 mb-4">
