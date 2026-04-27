@@ -8,15 +8,23 @@ const router = Router();
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await AuthService.findUserByEmail(email?.toLowerCase().trim());
+    const normalizedEmail = email?.toLowerCase().trim();
+    console.log(`[DEBUG] Login Attempt: "${normalizedEmail}" (Length: ${normalizedEmail?.length})`);
+    
+    const user = await AuthService.findUserByEmail(normalizedEmail);
     if (!user) {
-      console.log(`[AUTH] Login failed: User not found (${email})`);
+      console.log(`[DEBUG] User not found in database: "${normalizedEmail}"`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    console.log(`[DEBUG] User found! ID: ${user.id}`);
+    console.log(`[DEBUG] Password Length Received: ${password?.length}`);
+    console.log(`[DEBUG] Stored Hash Prefix: ${user.passwordHash.substring(0, 10)}...`);
+
     const isMatch = await AuthService.comparePassword(password, user.passwordHash);
+    console.log(`[DEBUG] Bcrypt Match Result: ${isMatch}`);
+
     if (!isMatch) {
-      console.log(`[AUTH] Login failed: Password mismatch for ${email}`);
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

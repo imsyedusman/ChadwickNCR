@@ -71,6 +71,34 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/debug-db', async (req, res) => {
+  try {
+    const { db } = await import('./db');
+    const { users } = await import('./db/schema');
+    const { count, eq } = await import('drizzle-orm');
+    
+    const userCount = await db.select({ value: count() }).from(users);
+    const susman = await db.query.users.findFirst({
+      where: eq(users.email, 'susman@chadwickswitchboards.com.au')
+    });
+
+    res.json({
+      database: 'connected',
+      userCount: userCount[0].value,
+      susmanExists: !!susman,
+      susmanEmail: susman?.email,
+      env: {
+        NODE_ENV: process.env.NODE_ENV,
+        PORT: process.env.PORT,
+        HAS_DATABASE_URL: !!process.env.DATABASE_URL,
+        HAS_JWT_SECRET: !!process.env.JWT_SECRET
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
 app.listen(port, () => {
   console.log(`🚀 Chadwick NCR Server running on port ${port}`);
 });
