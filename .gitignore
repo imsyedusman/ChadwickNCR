@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+server/.env
+client/.env
+server/dist/
+client/dist/
+*.log
+.DS_Store
+.vscode/
+brain/
+uploads/
+server/uploads/
