@@ -62,7 +62,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // Serve client static files in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../client/dist')));
-  app.get('/:path*', (req, res) => {
+  app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
   });
 }
