@@ -7,8 +7,36 @@ import uploadRoutes from './routes/upload.routes';
 import userRoutes from './routes/user.routes';
 import departmentRoutes from './routes/department.routes';
 import path from 'path';
+import fs from 'fs';
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 dotenv.config();
+
+// Validate critical environment variables
+const requiredEnv = ['DATABASE_URL', 'JWT_SECRET'];
+const missingEnv = requiredEnv.filter(env => !process.env[env]);
+
+if (missingEnv.length > 0) {
+  console.error(`❌ CRITICAL ERROR: Missing required environment variables: ${missingEnv.join(', ')}`);
+  console.error('Please ensure these are set in your deployment environment.');
+  process.exit(1);
+}
+
+// Global error handlers for better logging
+process.on('uncaughtException', (error) => {
+  console.error('💥 UNCAUGHT EXCEPTION:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  process.exit(1);
+});
 
 const app = express();
 const port = process.env.PORT || 3001;
