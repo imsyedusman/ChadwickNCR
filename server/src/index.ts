@@ -73,8 +73,8 @@ app.get('/health', (req, res) => {
 
 app.get('/api/debug-db', async (req, res) => {
   try {
-    const { db } = await import('./db');
-    const { users } = await import('./db/schema');
+    const { db } = await import('./db/index.js');
+    const { users } = await import('./db/schema.js');
     const { count, eq } = await import('drizzle-orm');
     
     const userCount = await db.select({ value: count() }).from(users);
