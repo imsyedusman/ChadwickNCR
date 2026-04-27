@@ -31,6 +31,14 @@ app.use('/api/departments', departmentRoutes);
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Serve client static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../client/dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+  });
+}
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
