@@ -8,3 +8,8 @@ build/
 npm-debug.log*
 Dockerfile
 docker-compose.yml
+
+# Ensure Drizzle files are included for migrations
+!drizzle.config.ts
+!server/drizzle.config.ts
+!server/drizzle/
