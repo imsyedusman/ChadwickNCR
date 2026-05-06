@@ -63,6 +63,7 @@ const NcrListPage = () => {
       case 'DRAFT': return 'bg-slate-100 text-slate-600 border-slate-200';
       case 'ASSIGNED': return 'bg-blue-50 text-blue-600 border-blue-200';
       case 'AWAITING_APPROVAL': return 'bg-amber-50 text-amber-600 border-amber-200';
+      case 'VERIFICATION': return 'bg-purple-50 text-purple-600 border-purple-200';
       case 'APPROVED': return 'bg-emerald-50 text-emerald-600 border-emerald-200';
       case 'REJECTED': return 'bg-red-50 text-red-600 border-red-200';
       case 'CLOSED': return 'bg-slate-500 text-white border-transparent';
@@ -71,7 +72,7 @@ const NcrListPage = () => {
     }
   };
 
-  const statuses = ['ALL', 'DRAFT', 'ASSIGNED', 'AWAITING_APPROVAL', 'APPROVED', 'REJECTED', 'CLOSED', 'CANCELLED'];
+  const statuses = ['ALL', 'DRAFT', 'ASSIGNED', 'AWAITING_APPROVAL', 'VERIFICATION', 'APPROVED', 'REJECTED', 'CLOSED', 'CANCELLED'];
 
   if (loading) return (
     <div className="flex items-center justify-center h-[60vh]">

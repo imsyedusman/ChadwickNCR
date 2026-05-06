@@ -11,6 +11,7 @@ import {
   X,
   Users,
   UserCircle,
+  Bell,
   Search as SearchIcon
 } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -113,7 +114,8 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <div className="px-2 mt-6 mb-2">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Admin</p>
               </div>
-              <NavItem to="/admin/users" icon={<Users size={18} />} label="User Management" active={location.pathname.startsWith('/admin')} onClick={closeSidebar} />
+              <NavItem to="/admin/users" icon={<Users size={18} />} label="User Management" active={location.pathname === '/admin/users'} onClick={closeSidebar} />
+              <NavItem to="/admin/notifications" icon={<Bell size={18} />} label="Notifications" active={location.pathname === '/admin/notifications'} onClick={closeSidebar} />
             </>
           )}
 

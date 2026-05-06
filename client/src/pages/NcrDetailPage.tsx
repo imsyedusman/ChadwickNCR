@@ -134,7 +134,7 @@ const NcrDetailPage = () => {
   };
 
   const getStatusStep = (status: string) => {
-    const steps = ['DRAFT', 'ASSIGNED', 'AWAITING_APPROVAL', 'APPROVED', 'CLOSED'];
+    const steps = ['DRAFT', 'ASSIGNED', 'AWAITING_APPROVAL', 'VERIFICATION', 'APPROVED', 'CLOSED'];
     return steps.indexOf(status);
   };
 
@@ -201,6 +201,7 @@ const NcrDetailPage = () => {
     { label: 'Draft', value: 'DRAFT' },
     { label: 'Assigned', value: 'ASSIGNED' },
     { label: 'Review', value: 'AWAITING_APPROVAL' },
+    { label: 'Verify', value: 'VERIFICATION' },
     { label: 'Approved', value: 'APPROVED' },
     { label: 'Closed', value: 'CLOSED' }
   ];

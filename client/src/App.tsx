@@ -11,6 +11,7 @@ import CapaPage from './pages/CapaPage';
 import AuditTrailPage from './pages/AuditTrailPage';
 import SettingsPage from './pages/SettingsPage';
 import UserManagementPage from './pages/UserManagementPage';
+import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import { useLocation } from 'react-router-dom';
@@ -54,6 +55,7 @@ function App() {
           <Route path="/capa" element={<ProtectedRoute><Layout><CapaPage /></Layout></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><Layout><AuditTrailPage /></Layout></ProtectedRoute>} />
           <Route path="/admin/users" element={<ProtectedRoute roles={['ADMIN']}><Layout><UserManagementPage /></Layout></ProtectedRoute>} />
+          <Route path="/admin/notifications" element={<ProtectedRoute roles={['ADMIN']}><Layout><NotificationSettingsPage /></Layout></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Layout><UserProfilePage /></Layout></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Layout><SettingsPage /></Layout></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />

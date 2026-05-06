@@ -40,6 +40,7 @@ router.post('/login', async (req, res) => {
       } 
     });
   } catch (error: any) {
+    console.error(`[ERROR] Login failed for ${email}:`, error);
     res.status(500).json({ error: error.message });
   }
 });

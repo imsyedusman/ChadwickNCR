@@ -17,11 +17,34 @@ export const ncrStatusEnum = pgEnum('ncr_status', [
   'DRAFT',
   'ASSIGNED',
   'AWAITING_APPROVAL',
+  'VERIFICATION',
   'APPROVED',
   'REJECTED',
   'CLOSED',
   'CANCELLED',
 ]);
+
+// Notification Settings (Single row global config)
+export const notificationSettings = pgTable('notification_settings', {
+  id: integer('id').primaryKey().default(1),
+  globalEnabled: boolean('global_enabled').default(true).notNull(),
+
+  // Notification types
+  ncrCreatedEnabled: boolean('ncr_created_enabled').default(true).notNull(),
+  ncrAssignedEnabled: boolean('ncr_assigned_enabled').default(true).notNull(),
+  statusChangeEnabled: boolean('status_change_enabled').default(true).notNull(),
+  overdueEnabled: boolean('overdue_enabled').default(true).notNull(),
+  verificationRequiredEnabled: boolean('verification_required_enabled').default(true).notNull(),
+  verificationRejectedEnabled: boolean('verification_rejected_enabled').default(true).notNull(),
+  ncrClosedEnabled: boolean('ncr_closed_enabled').default(true).notNull(),
+  ncrCancelledEnabled: boolean('ncr_cancelled_enabled').default(true).notNull(),
+
+  // Overdue settings
+  overdueFirstFollowUpDays: integer('overdue_first_follow_up_days').default(3).notNull(),
+  overdueRecurringDays: integer('overdue_recurring_days').default(7).notNull(),
+
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
 export const capaStatusEnum = pgEnum('capa_status', [
   'PENDING',
   'IN_PROGRESS',

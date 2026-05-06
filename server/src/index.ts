@@ -6,8 +6,10 @@ import ncrRoutes from './routes/ncr.routes';
 import uploadRoutes from './routes/upload.routes';
 import userRoutes from './routes/user.routes';
 import departmentRoutes from './routes/department.routes';
+import notificationRoutes from './routes/notification-settings.routes';
 import path from 'path';
 import fs from 'fs';
+import { cronService } from './services/cron.service';
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -16,7 +18,8 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Load .env from the server directory regardless of where the process is started
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Load .env from the server directory
+dotenv.config({ path: path.join(__dirname, '../.env') });
 
 // Validate critical environment variables
 const requiredEnv = ['DATABASE_URL', 'JWT_SECRET'];
@@ -56,6 +59,7 @@ app.use('/api/ncrs', ncrRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/notification-settings', notificationRoutes);
 
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
@@ -107,4 +111,5 @@ app.get('/api/debug-db', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`🚀 Chadwick NCR Server running on port ${port}`);
+  cronService.start();
 });

@@ -130,12 +130,7 @@ router.patch('/:id', async (req: AuthRequest, res) => {
     delete data.autoId;
     delete data.status;
 
-    const [updated] = await db
-      .update(ncrs)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(ncrs.id, req.params.id as string))
-      .returning();
-
+    const updated = await NcrService.updateNcrFields(req.params.id as string, data, req.user!.id);
     res.json(updated);
   } catch (error: any) {
     res.status(400).json({ error: error.message });

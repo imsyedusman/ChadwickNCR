@@ -9,6 +9,8 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 if (!process.env.DATABASE_URL) {
   console.warn('⚠️ DATABASE_URL is not set in environment variables. Drizzle may fail to connect.');
+} else {
+  console.log(`[DB] Connecting to: ${process.env.DATABASE_URL.split('@')[1]}`);
 }
 
 const pool = new Pool({
