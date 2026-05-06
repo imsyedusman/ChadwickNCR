@@ -51,10 +51,16 @@ export class NcrService {
     if (data.handlerId && data.handlerId !== oldNcr.handlerId) {
       (async () => {
         try {
-          const newOwner = await db.query.users.findFirst({ where: eq(users.id, data.handlerId) });
+          const fullNcr = await db.query.ncrs.findFirst({
+            where: eq(ncrs.id, ncrId),
+            with: {
+              handler: true,
+              issuedToDepartment: true,
+            }
+          });
           const actingUser = await db.query.users.findFirst({ where: eq(users.id, userId) });
-          if (newOwner?.email) {
-            emailService.notifyNcrAssigned(updated, newOwner.email, actingUser?.name || 'System');
+          if (fullNcr?.handler?.email) {
+            emailService.notifyNcrAssigned(fullNcr, fullNcr.handler.email, actingUser?.name || 'System');
           }
         } catch (err) {
           console.error('[NcrService] Assignment notification background task failed:', err);

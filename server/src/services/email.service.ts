@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { db } from '../db';
 import { notificationSettings } from '../db/schema';
 import { eq } from 'drizzle-orm';
+import { DateTime } from 'luxon';
 
 class EmailService {
   private transporter: nodemailer.Transporter;
@@ -29,8 +30,25 @@ class EmailService {
     return settings;
   }
 
-  private renderTemplate(content: string, ctaText: string, ctaLink: string) {
+  private async getLogoBase64(): Promise<string> {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const logoPath = path.join(__dirname, '../../uploads/logo_official.png');
+      if (fs.existsSync(logoPath)) {
+        const logoBuffer = fs.readFileSync(logoPath);
+        return `data:image/png;base64,${logoBuffer.toString('base64')}`;
+      }
+    } catch (err) {
+      console.error('[EmailService] Failed to load logo:', err);
+    }
+    return '';
+  }
+
+  private async renderTemplate(content: string, ctaText: string, ctaLink: string) {
     const brandColor = '#2b95ff';
+    const logoBase64 = await this.getLogoBase64();
+
     return `
       <!DOCTYPE html>
       <html>
@@ -52,6 +70,11 @@ class EmailService {
           }
           .header {
             padding: 0 0 32px;
+          }
+          .logo {
+            height: 48px;
+            margin-bottom: 16px;
+            display: block;
           }
           .header h1 {
             margin: 0;
@@ -114,6 +137,7 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
+            ${logoBase64 ? `<img src="${logoBase64}" alt="Chadwick Switchboards" class="logo">` : ''}
             <h1>Chadwick Switchboards</h1>
           </div>
           <div class="content">
@@ -177,14 +201,17 @@ class EmailService {
       ${this.formatDetails({
         'NCR Number': ncr.autoId,
         'Title': ncr.title,
-        'Category': ncr.category,
-        'Location': ncr.location,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
+        'Department': ncr.issuedToDepartment?.name || 'N/A',
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
+        'NCR Summary': ncr.description || 'No description provided',
         'Issued By': ncr.issuedBy?.name || 'System',
-        'Issued Date': new Date(ncr.createdAt).toLocaleDateString('en-AU'),
+        'Issued Date': DateTime.fromJSDate(new Date(ncr.createdAt)).setZone('Australia/Sydney').toFormat('dd LLL yyyy, h:mm a'),
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View NCR Details', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View NCR Details', link));
   }
 
   async notifyNcrAssigned(ncr: any, ownerEmail: string, assignedBy: string) {
@@ -197,12 +224,16 @@ class EmailService {
       ${this.formatDetails({
         'NCR Number': ncr.autoId,
         'Title': ncr.title,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
         'Assigned By': assignedBy,
+        'Department': ncr.issuedToDepartment?.name || 'N/A',
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
         'Current Status': ncr.status,
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(ownerEmail, subject, this.renderTemplate(content, 'View Assigned NCR', link));
+    await this.sendEmail(ownerEmail, subject, await this.renderTemplate(content, 'View Assigned NCR', link));
   }
 
   async notifyStatusChange(ncr: any, recipientEmails: string[], oldStatus: string, newStatus: string, changedBy: string) {
@@ -215,14 +246,15 @@ class EmailService {
       ${this.formatDetails({
         'NCR Number': ncr.autoId,
         'Title': ncr.title,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
         'Old Status': oldStatus,
         'New Status': newStatus,
         'Changed By': changedBy,
-        'Timestamp': new Date().toLocaleString('en-AU', { timeZone: 'Australia/Sydney' }),
+        'Timestamp': DateTime.now().setZone('Australia/Sydney').toFormat('dd LLL yyyy, h:mm a'),
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View Status Update', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View Status Update', link));
   }
 
   async notifyOverdueAction(ncr: any, action: any, recipientEmails: string[], daysOverdue: number) {
@@ -235,12 +267,15 @@ class EmailService {
       ${this.formatDetails({
         'NCR Number': ncr.autoId,
         'Action': action.description,
-        'Due Date': new Date(action.dueDate).toLocaleDateString('en-AU'),
+        'Due Date': DateTime.fromJSDate(new Date(action.dueDate)).setZone('Australia/Sydney').toFormat('dd LLL yyyy, h:mm a'),
         'Overdue': `${daysOverdue} days`,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View Overdue Action', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View Overdue Action', link));
   }
 
   async notifyVerificationRequired(ncr: any, recipientEmails: string[], submittedBy: string) {
@@ -254,10 +289,13 @@ class EmailService {
         'NCR Number': ncr.autoId,
         'Title': ncr.title,
         'Submitted By': submittedBy,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'Perform Verification', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'Perform Verification', link));
   }
 
   async notifyVerificationRejected(ncr: any, recipientEmails: string[], rejectedBy: string, reason: string) {
@@ -271,10 +309,11 @@ class EmailService {
         'NCR Number': ncr.autoId,
         'Rejected By': rejectedBy,
         'Reason': reason,
+        'Assigned To': ncr.handler?.name || 'Unassigned',
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View Rejection Details', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View Rejection Details', link));
   }
 
   async notifyNcrClosed(ncr: any, recipientEmails: string[], closedBy: string) {
@@ -288,11 +327,13 @@ class EmailService {
         'NCR Number': ncr.autoId,
         'Title': ncr.title,
         'Closed By': closedBy,
-        'Date Closed': new Date().toLocaleDateString('en-AU'),
+        'Date Closed': DateTime.now().setZone('Australia/Sydney').toFormat('dd LLL yyyy, h:mm a'),
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View Closed NCR', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View Closed NCR', link));
   }
 
   async notifyNcrCancelled(ncr: any, recipientEmails: string[], cancelledBy: string, reason: string) {
@@ -307,10 +348,12 @@ class EmailService {
         'Title': ncr.title,
         'Cancelled By': cancelledBy,
         'Reason': reason,
+        'Location': ncr.location || 'N/A',
+        'Category': ncr.category || 'N/A',
       })}
     `;
     const link = `${process.env.FRONTEND_URL}/ncrs/${ncr.id}`;
-    await this.sendEmail(recipientEmails, subject, this.renderTemplate(content, 'View Cancellation', link));
+    await this.sendEmail(recipientEmails, subject, await this.renderTemplate(content, 'View Cancellation', link));
   }
 }
 
