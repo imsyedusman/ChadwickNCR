@@ -1,4 +1,4 @@
-import API_URL from '../config';
+import api from '../lib/api';
 
 export interface User {
   id: string;
@@ -16,80 +16,31 @@ export interface User {
 
 export const userService = {
   getAll: async (): Promise<User[]> => {
-    const response = await fetch(`${API_URL}/users`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch users');
-    return response.json();
+    const response = await api.get('/users');
+    return response.data;
   },
 
   create: async (data: Partial<User>): Promise<{ user: User; tempPassword?: string }> => {
-    const response = await fetch(`${API_URL}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Failed to create user');
-    }
-    return response.json();
+    const response = await api.post('/users', data);
+    return response.data;
   },
 
   update: async (id: string, data: Partial<User>): Promise<User> => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to update user');
-    return response.json();
+    const response = await api.patch(`/users/${id}`, data);
+    return response.data;
   },
 
   setStatus: async (id: string, isActive: boolean): Promise<User> => {
-    const response = await fetch(`${API_URL}/users/${id}/status`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ isActive })
-    });
-    if (!response.ok) throw new Error('Failed to update status');
-    return response.json();
+    const response = await api.patch(`/users/${id}/status`, { isActive });
+    return response.data;
   },
 
   resetPassword: async (id: string): Promise<{ tempPassword: string }> => {
-    const response = await fetch(`${API_URL}/users/${id}/reset-password`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to reset password');
-    return response.json();
+    const response = await api.post(`/users/${id}/reset-password`);
+    return response.data;
   },
 
   changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/users/me/password`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ currentPassword, newPassword })
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Failed to change password');
-    }
+    await api.patch('/users/me/password', { currentPassword, newPassword });
   }
 };

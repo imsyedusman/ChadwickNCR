@@ -8,7 +8,7 @@ import { Input } from '../components/ui/input';
 import { Badge } from '../components/ui/badge';
 import { Card, CardContent } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../components/ui/select';
-import { cn } from '../lib/utils';
+import { cn, formatSydneyDate, formatDuration } from '../lib/utils';
 
 const NcrListPage = () => {
   const [ncrs, setNcrs] = useState<NCR[]>([]);
@@ -30,8 +30,8 @@ const NcrListPage = () => {
 
   const filteredNcrs = ncrs.filter(n => {
     const matchesSearch = n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          n.autoId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          n.projectId.toLowerCase().includes(searchTerm.toLowerCase());
+      n.autoId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      n.projectId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSeverity = filterSeverity === 'ALL' || n.severity === filterSeverity;
     const matchesStatus = filterStatus === 'ALL' || n.status === filterStatus;
     return matchesSearch && matchesSeverity && matchesStatus;
@@ -163,7 +163,9 @@ const NcrListPage = () => {
                   <th className="px-6 py-4">Project</th>
                   <th className="px-6 py-4">Severity</th>
                   <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Date</th>
+                  <th className="px-6 py-4">Date Issued</th>
+                  <th className="px-6 py-4">Date Closed</th>
+                  <th className="px-6 py-4">Ageing</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -194,7 +196,17 @@ const NcrListPage = () => {
                       </div>
                     </td>
                     <td className="px-6 py-5">
-                      <span className="text-[11px] font-bold text-muted-foreground">{new Date(ncr.createdAt).toLocaleDateString()}</span>
+                      <span className="text-[11px] font-bold text-muted-foreground">{formatSydneyDate(ncr.createdAt)}</span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-[11px] font-bold text-muted-foreground">
+                        {ncr.status === 'CLOSED' ? formatSydneyDate(ncr.dateClosed) : <span className="opacity-30">—</span>}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-[11px] font-bold text-muted-foreground">
+                        {formatDuration((ncr.dateClosed ? new Date(ncr.dateClosed).getTime() : Date.now()) - new Date(ncr.createdAt).getTime())}
+                      </span>
                     </td>
                     <td className="px-6 py-5 text-right">
                       <Link to={`/ncrs/${ncr.id}`}>
@@ -208,7 +220,7 @@ const NcrListPage = () => {
               </tbody>
             </table>
           </div>
-          
+
           {filteredNcrs.length === 0 && (
             <div className="flex flex-col items-center justify-center py-24 text-muted-foreground bg-muted/5">
               <div className="p-4 bg-muted rounded-full mb-4 opacity-40">

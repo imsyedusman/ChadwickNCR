@@ -13,7 +13,7 @@ export class NcrService {
         set: { value: sql`${counters.value} + 1` },
       })
       .returning();
-    
+
     return `NCR-${counter.value.toString().padStart(4, '0')}`;
   }
 
@@ -28,7 +28,7 @@ export class NcrService {
         status: 'DRAFT',
       })
       .returning();
-    
+
     await AuditService.log(ncr.id, userId, 'CREATE', { ncrId: autoId });
     return ncr;
   }
@@ -51,7 +51,7 @@ export class NcrService {
         (newStatus === 'ASSIGNED' && ncr.status === 'DRAFT') ||
         (newStatus === 'AWAITING_APPROVAL' && ncr.status === 'ASSIGNED')
       );
-      
+
       if (!isValidLinear || !isHandler) {
         throw new Error('Unauthorized transition or permission denied. Handlers are locked to linear forward progression.');
       }
@@ -84,9 +84,11 @@ export class NcrService {
 
     const [updated] = await db
       .update(ncrs)
-      .set({ 
-        status: newStatus as any, 
+      .set({
+        status: newStatus as any,
         updatedAt: new Date(),
+        ...(newStatus === 'CLOSED' ? { dateClosed: new Date() } : {}),
+        ...(newStatus !== 'CLOSED' && ncr.status === 'CLOSED' ? { dateClosed: null } : {}),
         ...(newStatus === 'CANCELLED' || newStatus === 'REJECTED' ? { cancellationReason: reason, cancellationUserId: userId } : {})
       })
       .where(eq(ncrs.id, ncrId))
@@ -103,7 +105,7 @@ export class NcrService {
       stage,
       metadata,
     });
-    
+
     await AuditService.log(ncrId, userId, 'SIGN_OFF', { stage });
   }
 }

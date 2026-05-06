@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ncrService } from '../services/ncr.service';
 import type { NCR } from '../services/ncr.service';
-import { 
-  AlertTriangle, 
-  Clock, 
+import {
+  AlertTriangle,
+  Clock,
   FileText,
   TrendingUp,
   ArrowRight,
@@ -15,28 +15,31 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '../lib/utils';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import { cn, formatDuration, formatSydneyDate } from '../lib/utils';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   BarChart,
   Bar,
   Cell
 } from 'recharts';
 
-const StatsCard = ({ title, value, icon: Icon, description, trend, status }: any) => (
+const StatsCard = ({ title, value, unit, icon: Icon, description, trend, status }: any) => (
   <Card className="border-border/40 hover:bg-muted/5 transition-all duration-300">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">{title}</CardTitle>
       <Icon className={cn("h-4 w-4", status === 'urgent' ? "text-primary" : "text-muted-foreground/60")} />
     </CardHeader>
     <CardContent>
-      <div className="text-3xl font-black tracking-tighter mb-1">{value}</div>
+      <div className="flex flex-col">
+        <div className="text-3xl font-black tracking-tighter">{value}</div>
+        {unit && <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50 mb-2">{unit}</div>}
+      </div>
       <div className="flex items-center gap-2">
         <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1", trend > 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>
           {trend > 0 ? <TrendingUp size={10} /> : null}
@@ -64,11 +67,30 @@ const DashboardPage = () => {
     });
   }, []);
 
+  const closedNcrs = ncrs.filter(n => n.status === 'CLOSED');
+  const openNcrs = ncrs.filter(n => n.status !== 'CLOSED' && n.status !== 'CANCELLED');
+
+  const avgResolutionTime = closedNcrs.length > 0
+    ? closedNcrs.reduce((acc, ncr) => {
+      const start = new Date(ncr.createdAt).getTime();
+      const end = new Date(ncr.dateClosed!).getTime();
+      return acc + (end - start);
+    }, 0) / closedNcrs.length
+    : 0;
+
+  const resolutionRate = ncrs.length > 0
+    ? Math.round((closedNcrs.length / ncrs.length) * 100)
+    : 0;
+
+  const avgDays = closedNcrs.length > 0 ? Math.floor(avgResolutionTime / (1000 * 60 * 60 * 24)) : undefined;
+
   const stats = {
     total: ncrs.length,
-    open: ncrs.filter(n => n.status !== 'CLOSED' && n.status !== 'CANCELLED').length,
+    open: openNcrs.length,
     critical: ncrs.filter(n => n.severity === 'CRITICAL' && n.status !== 'CLOSED').length,
-    overdue: ncrs.filter(n => n.status !== 'CLOSED' && n.status !== 'CANCELLED').length // Mock logic
+    resolutionRate: `${resolutionRate}%`,
+    avgResolution: avgDays === undefined ? '—' : (avgDays < 1 ? '< 1' : avgDays.toString()),
+    avgUnit: avgDays === undefined ? '' : 'Days'
   };
 
   const trendData = Array.from({ length: 7 }).map((_, i) => {
@@ -79,8 +101,13 @@ const DashboardPage = () => {
     nextDay.setDate(nextDay.getDate() + 1);
     return {
       name: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      count: ncrs.filter(ncr => {
+      issued: ncrs.filter(ncr => {
         const ncrDate = new Date(ncr.createdAt);
+        return ncrDate >= d && ncrDate < nextDay;
+      }).length,
+      closed: ncrs.filter(ncr => {
+        if (!ncr.dateClosed) return false;
+        const ncrDate = new Date(ncr.dateClosed);
         return ncrDate >= d && ncrDate < nextDay;
       }).length
     };
@@ -88,8 +115,8 @@ const DashboardPage = () => {
 
   const severityData = [
     { name: 'Critical', value: stats.critical > 0 ? stats.critical : 0, full: 10, color: '#2b95ff' },
-    { name: 'Major', value: ncrs.filter(n => n.severity === 'MAJOR').length, full: 10, color: '#2b95ff' },
-    { name: 'Minor', value: ncrs.filter(n => n.severity === 'MINOR').length, full: 10, color: '#2b95ff' },
+    { name: 'Major', value: ncrs.filter(n => n.severity === 'MAJOR' && n.status !== 'CLOSED').length, full: 10, color: '#2b95ff' },
+    { name: 'Minor', value: ncrs.filter(n => n.severity === 'MINOR' && n.status !== 'CLOSED').length, full: 10, color: '#2b95ff' },
   ];
 
   return (
@@ -106,36 +133,37 @@ const DashboardPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard 
-          title="Active Reports" 
-          value={stats.open} 
-          icon={FileText} 
-          description="Awaiting processing" 
+        <StatsCard
+          title="Active Reports"
+          value={stats.open}
+          icon={FileText}
+          description="Awaiting processing"
           trend={2}
           status="normal"
         />
-        <StatsCard 
-          title="Critical Cases" 
-          value={stats.critical} 
-          icon={AlertTriangle} 
-          description="Requiring attention" 
-          trend={1}
-          status="urgent"
+        <StatsCard
+          title="Resolution Rate"
+          value={stats.resolutionRate}
+          icon={TrendingUp}
+          description="Closure efficiency"
+          trend={5}
+          status="normal"
         />
-        <StatsCard 
-          title="Awaiting Approval" 
-          value={ncrs.filter(n => n.status === 'AWAITING_APPROVAL').length} 
-          icon={Clock} 
-          description="Pending review" 
+        <StatsCard
+          title="Avg. Resolution"
+          value={stats.avgResolution}
+          unit={stats.avgUnit}
+          icon={Clock}
+          description="Cycle time"
           trend={0}
           status="normal"
         />
-        <StatsCard 
-          title="Overdue Items" 
-          value={stats.overdue} 
-          icon={CalendarDays} 
-          description="Past target date" 
-          trend={3}
+        <StatsCard
+          title="Critical Cases"
+          value={stats.critical}
+          icon={AlertTriangle}
+          description="Requiring attention"
+          trend={1}
           status="urgent"
         />
       </div>
@@ -143,8 +171,8 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         <Card className="border-border/40 flex flex-col h-full">
           <CardHeader>
-            <CardTitle className="text-lg font-bold">Registration Trend</CardTitle>
-            <CardDescription>Daily volume of quality occurrences</CardDescription>
+            <CardTitle className="text-lg font-bold">Activity Trends</CardTitle>
+            <CardDescription>Daily volume of issued vs. closed records</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px] mt-auto">
             <ResponsiveContainer width="100%" height="100%">
@@ -152,10 +180,11 @@ const DashboardPage = () => {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" opacity={0.5} />
                 <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
                 <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' }}
                 />
-                <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} />
+                <Line name="Issued" type="monotone" dataKey="issued" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, fill: 'hsl(var(--primary))' }} activeDot={{ r: 6 }} />
+                <Line name="Closed" type="monotone" dataKey="closed" stroke="hsl(var(--emerald-500))" strokeWidth={3} dot={{ r: 4, fill: 'hsl(var(--emerald-500))' }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
@@ -198,48 +227,59 @@ const DashboardPage = () => {
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">NCR ID</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Details</th>
                   <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Severity</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Date</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Date Issued</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Ageing</th>
                   <th className="px-6 py-4"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/30">
-                {ncrs.slice(0, 5).map(ncr => (
-                  <tr key={ncr.id} className="hover:bg-muted/10 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className={cn("inline-flex items-center px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-tighter",
-                        ncr.status === 'DRAFT' ? 'bg-gray-200 text-gray-800' :
-                        ncr.status === 'ASSIGNED' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                        ncr.status === 'AWAITING_APPROVAL' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                        ncr.status === 'APPROVED' ? 'bg-green-100 text-green-800 border-green-200' :
-                        ncr.status === 'REJECTED' ? 'bg-red-100 text-red-800 border-red-200 font-bold' :
-                        ncr.status === 'CLOSED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
-                        'bg-slate-200 text-slate-800'
-                      )}>
-                        {ncr.status.replace('_', ' ')}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-black text-[10px] tracking-widest text-muted-foreground">{ncr.autoId}</td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-bold group-hover:text-primary transition-colors">{ncr.title}</p>
-                      <p className="text-[10px] text-muted-foreground font-bold tracking-tight uppercase">{ncr.projectId} • {ncr.location}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className={cn("text-[9px] font-black border-border/60", ncr.severity === 'CRITICAL' ? "text-destructive border-destructive/20" : "")}>
-                        {ncr.severity}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-xs font-medium text-muted-foreground">
-                      {new Date(ncr.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link to={`/ncrs/${ncr.id}`}>
-                        <Button variant="ghost" size="sm" className="h-8 px-2 group-hover:bg-primary/5 transition-colors">
-                          <ArrowRight size={14} className="text-muted-foreground group-hover:text-primary" />
-                        </Button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {ncrs.slice(0, 5).map(ncr => {
+                  const start = new Date(ncr.createdAt).getTime();
+                  const end = ncr.dateClosed ? new Date(ncr.dateClosed).getTime() : Date.now();
+                  const ageingMs = end - start;
+
+                  return (
+                    <tr key={ncr.id} className="hover:bg-muted/10 transition-colors group">
+                      <td className="px-6 py-4">
+                        {/* ... status badge ... */}
+                        <div className={cn("inline-flex items-center px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-tighter",
+                          ncr.status === 'DRAFT' ? 'bg-gray-200 text-gray-800' :
+                            ncr.status === 'ASSIGNED' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                              ncr.status === 'AWAITING_APPROVAL' ? 'bg-orange-100 text-orange-800 border-orange-200' :
+                                ncr.status === 'APPROVED' ? 'bg-green-100 text-green-800 border-green-200' :
+                                  ncr.status === 'REJECTED' ? 'bg-red-100 text-red-800 border-red-200 font-bold' :
+                                    ncr.status === 'CLOSED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                                      'bg-slate-200 text-slate-800'
+                        )}>
+                          {ncr.status.replace('_', ' ')}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-black text-[10px] tracking-widest text-muted-foreground">{ncr.autoId}</td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-bold group-hover:text-primary transition-colors">{ncr.title}</p>
+                        <p className="text-[10px] text-muted-foreground font-bold tracking-tight uppercase">{ncr.projectId} • {ncr.location}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant="outline" className={cn("text-[9px] font-black border-border/60", ncr.severity === 'CRITICAL' ? "text-destructive border-destructive/20" : "")}>
+                          {ncr.severity}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 text-xs font-medium text-muted-foreground">
+                        {formatSydneyDate(ncr.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 text-xs font-bold text-muted-foreground">
+                        {formatDuration(ageingMs)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <Link to={`/ncrs/${ncr.id}`}>
+                          <Button variant="ghost" size="sm" className="h-8 px-2 group-hover:bg-primary/5 transition-colors">
+                            <ArrowRight size={14} className="text-muted-foreground group-hover:text-primary" />
+                          </Button>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

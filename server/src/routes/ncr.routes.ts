@@ -107,12 +107,12 @@ router.get('/:id', async (req, res) => {
         signatures: { with: { user: true } },
       },
     });
-    
+
     if (!ncr) {
       console.warn(`[GET /api/ncrs/${req.params.id}] NCR not found in database`);
       return res.status(404).json({ error: 'NCR not found' });
     }
-    
+
     console.log(`[GET /api/ncrs/${req.params.id}] Found NCR: ${ncr.autoId} - ${ncr.title}`);
     res.json(ncr);
   } catch (error: any) {
@@ -124,18 +124,18 @@ router.get('/:id', async (req, res) => {
 router.patch('/:id', async (req: AuthRequest, res) => {
   try {
     const data = req.body;
-    
+
     // Prevent updating protected fields
     delete data.id;
     delete data.autoId;
     delete data.status;
-    
+
     const [updated] = await db
       .update(ncrs)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(ncrs.id, req.params.id as string))
       .returning();
-      
+
     res.json(updated);
   } catch (error: any) {
     res.status(400).json({ error: error.message });
@@ -159,11 +159,11 @@ router.patch('/:id/rca', async (req: AuthRequest, res) => {
       .set({ rootCauseAnalysis, updatedAt: new Date() })
       .where(eq(ncrs.id, req.params.id as string))
       .returning();
-    
+
     if (updated) {
       await AuditService.log(updated.id, req.user!.id, 'RCA_UPDATE', { count: rootCauseAnalysis?.length || 0 });
     }
-    
+
     res.json(updated);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

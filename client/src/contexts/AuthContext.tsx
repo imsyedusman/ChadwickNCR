@@ -27,15 +27,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // Verify token/fetch me if needed
-      setLoading(false);
-    } else {
-      delete axios.defaults.headers.common['Authorization'];
-      setLoading(false);
-    }
-  }, [token]);
+    // We handle token injection in the shared api instance (client/src/lib/api.ts)
+    setLoading(false);
+  }, []);
 
   const login = (newToken: string, newUser: User) => {
     setToken(newToken);

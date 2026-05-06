@@ -60,28 +60,29 @@ export const ncrs = pgTable('ncrs', {
   description: text('description').notNull(),
   severity: severityEnum('severity').notNull(),
   status: ncrStatusEnum('status').default('DRAFT').notNull(),
-  
+
   projectId: text('project_id').notNull(),
   projectName: text('project_name').notNull().default('N/A'),
   location: text('location').notNull(),
   category: text('category').notNull(),
-  
+
   attachments: jsonb('attachments'),
-  
+
   rootCauseAnalysis: jsonb('root_cause_analysis'), // 5-Why etc.
-  
+
   cancellationReason: text('cancellation_reason'),
   cancellationUserId: uuid('cancellation_user_id').references(() => users.id),
-  
+
   issuedByUserId: uuid('issued_by_user_id')
     .references(() => users.id)
     .notNull(),
   issuedToDepartmentId: uuid('issued_to_department_id')
     .references(() => departments.id)
     .notNull(),
-  
+
   handlerId: uuid('handler_id').references(() => users.id),
-  
+
+  dateClosed: timestamp('date_closed'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

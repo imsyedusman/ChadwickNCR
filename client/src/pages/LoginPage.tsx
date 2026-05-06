@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import api from '../lib/api';
+import { useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -17,13 +19,15 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isExpired = new URLSearchParams(location.search).get('expired') === 'true';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+      const res = await api.post('/auth/login', { email, password });
       login(res.data.token, res.data.user);
       navigate('/');
     } catch (err: any) {
@@ -50,6 +54,12 @@ const LoginPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
+            {isExpired && !error && (
+              <div className="bg-blue-50 p-3 rounded-md flex items-center gap-3 text-blue-700 text-xs font-semibold animate-in slide-in-from-top-2 border border-blue-100">
+                <AlertCircle size={16} />
+                Your session has expired. Please log in again.
+              </div>
+            )}
             {error && (
               <div className="bg-destructive/10 p-3 rounded-md flex items-center gap-3 text-destructive text-xs font-semibold animate-in slide-in-from-top-2">
                 <AlertCircle size={16} />

@@ -20,8 +20,9 @@ import {
   Paperclip,
   Trash2
 } from 'lucide-react';
-import axios from 'axios';
-import { API_URL, BASE_URL } from '../config';
+import { cn, formatSydneyDate, formatSydneyDateTime } from '../lib/utils';
+import api from '../lib/api';
+import { BASE_URL } from '../config';
 import Timeline from '../components/Timeline';
 import RcaWidget from '../components/RcaWidget';
 import CapaActionList from '../components/CapaActionList';
@@ -37,8 +38,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '../components/ui/select';
-import { cn } from '../lib/utils';
-
 const NcrDetailPage = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -62,7 +61,7 @@ const NcrDetailPage = () => {
         console.error('Error fetching NCR:', err);
         setLoading(false);
       });
-      axios.get(`${API_URL}/ncrs/departments`).then(res => {
+      api.get('/ncrs/departments').then(res => {
         setDepartments(res.data);
       }).catch(err => console.error(err));
     } else {
@@ -337,6 +336,20 @@ const NcrDetailPage = () => {
                 </p>
                 <p className="text-xs font-black">{ncr.issuedBy?.name || 'Unknown'}</p>
               </div>
+              <div className="space-y-1.5">
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                  <Clock size={10} /> Date Issued
+                </p>
+                <p className="text-xs font-black">{formatSydneyDateTime(ncr.createdAt)}</p>
+              </div>
+              {ncr.status === 'CLOSED' && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1.5">
+                    <Clock size={10} /> Date Closed
+                  </p>
+                  <p className="text-xs font-black text-primary">{formatSydneyDate(ncr.dateClosed)}</p>
+                </div>
+              )}
               <div className="space-y-1.5 col-span-2">
                 <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
                   <Building2 size={10} /> Issued To
